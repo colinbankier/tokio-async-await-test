@@ -2,7 +2,7 @@
 //!
 //! # Usage
 //!
-//! First, you must be on nightly rust as of `12-02-2018`. Add the crate to your `Cargo.toml`.
+//! First, you must be on nightly rust as of `2019-02-15`. Add the crate to your `Cargo.toml`.
 //!
 //! ``` toml
 //! [dependencies]
@@ -14,13 +14,13 @@
 //!
 //! ``` toml
 //! tokio = { version = "0.1", features = ["async-await-preview"] }
-//! futures-preview = { version = "0.3.0-alpha.10", features = ["tokio-compat"] }
+//! futures-preview = { version = "0.3.0-alpha.13" }
 //! ```
 //!
 //! Once, you have all these dependencies you can then use the attribute like so.
 //!
 //! ``` rust
-//! #![feature(pin, async_await, await_macro, futures_api)]
+//! #![feature(async_await, await_macro, futures_api)]
 //!
 //! extern crate futures;
 //! extern crate tokio;
@@ -48,12 +48,14 @@
 //!
 //! You can also use a current thread runtime by importing `use tokio_async_await_test::async_current_thread_test;`.
 
-#![feature(pin, async_await, await_macro, futures_api)]
+#![feature(async_await, await_macro, futures_api)]
+#![recursion_limit = "128"]
 
 extern crate proc_macro;
 
 #[macro_use]
 extern crate quote;
+extern crate tokio_async_await;
 
 use proc_macro::TokenStream;
 use syn::{parse_macro_input, ItemFn};
@@ -69,13 +71,14 @@ pub fn async_test(_attr: TokenStream, input: TokenStream) -> TokenStream {
         #[test]
         fn #test_case_name () {
             use tokio::runtime::Runtime;
+            use tokio_async_await::compat::backward;
             use futures::future::{FutureExt, TryFutureExt};
 
             let mut rt = Runtime::new().unwrap();
 
             #input
 
-            rt.block_on(#test_case_name().unit_error().boxed().compat()).unwrap();
+            rt.block_on(backward::Compat::new(#test_case_name().unit_error().boxed())).unwrap();
         }
     };
 
@@ -94,13 +97,14 @@ pub fn async_current_thread_test(_attr: TokenStream, input: TokenStream) -> Toke
         #[test]
         fn #test_case_name () {
             use tokio::runtime::current_thread::Runtime;
+            use tokio_async_await::compat::backward;
             use futures::future::{FutureExt, TryFutureExt};
 
             let mut rt = Runtime::new().unwrap();
 
             #input
 
-            rt.block_on(#test_case_name().unit_error().boxed().compat()).unwrap();
+            rt.block_on(backward::Compat::new(#test_case_name().unit_error().boxed())).unwrap();
         }
     };
 
