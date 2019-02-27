@@ -10,10 +10,11 @@
 //! ```
 //!
 //! This will give you the crate but you will also need to make sure that you also have
-//! `futures-preview` and `tokio` as dependencies like so.
+//! `futures-preview` ,`tokio` and `tokio-async-await` as dependencies like so.
 //!
 //! ``` toml
 //! tokio = { version = "0.1", features = ["async-await-preview"] }
+//! tokio-async-await = "0.1"
 //! futures-preview = { version = "0.3.0-alpha.13" }
 //! ```
 //!
@@ -24,6 +25,7 @@
 //!
 //! extern crate futures;
 //! extern crate tokio;
+//! extern crate tokio_async_await;
 //! extern crate tokio_async_await_test;
 //!
 //! use tokio_async_await_test::async_test;
